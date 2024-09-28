@@ -1,6 +1,4 @@
 #include <rack.hpp>
-//#include <osdialog.h>
-//#include <thread>
 
 template <class TModule>
 struct ORBsqViDisplay : rack::LedDisplay {
@@ -70,7 +68,7 @@ struct ORBsqViDisplay : rack::LedDisplay {
 			// drone
 			nvgBeginPath(args.vg);
 			p.x = rack::mm2px(1);
-			p.y = rack::mm2px(clamp(rescale(ramp[0], -5.f, 5.f, displaySize.y-8.f, 2.f),2.f,displaySize.y-8.f));
+			p.y = rack::mm2px(rack::math::clamp(rack::math::rescale(ramp[0], -5.f, 5.f, displaySize.y-8.f, 2.f),2.f,displaySize.y-8.f));
 			nvgMoveTo(args.vg, VEC_ARGS(p));
 			p.x = rack::mm2px(displaySize.x-1);
 			nvgLineTo(args.vg, VEC_ARGS(p));
@@ -87,7 +85,7 @@ struct ORBsqViDisplay : rack::LedDisplay {
 					if (module->curSeqState[i] == true) {
 						nvgBeginPath(args.vg);
 						p.x = rack::mm2px(1 + (i*stepX+2));
-						p.y = rack::mm2px(clamp(rescale(ramp[i], -5.f, 5.f, displaySize.y-8.f, 2.f),2.f,displaySize.y-8.f));
+						p.y = rack::mm2px(rack::math::clamp(rack::math::rescale(ramp[i], -5.f, 5.f, displaySize.y-8.f, 2.f),2.f,displaySize.y-8.f));
 						nvgMoveTo(args.vg, VEC_ARGS(p));
 						p.x = rack::mm2px(1 + ((i+1)*stepX)-1);
 						nvgLineTo(args.vg, VEC_ARGS(p));
@@ -99,7 +97,7 @@ struct ORBsqViDisplay : rack::LedDisplay {
 					} else {
 						nvgBeginPath(args.vg);
 						p.x = rack::mm2px(1 + (i*stepX+2));
-						p.y = rack::mm2px(clamp(rescale(ramp[i], -5.f, 5.f, displaySize.y-8.f, 2.f),2.f,displaySize.y-8.f));
+						p.y = rack::mm2px(rack::math::clamp(rack::math::rescale(ramp[i], -5.f, 5.f, displaySize.y-8.f, 2.f),2.f,displaySize.y-8.f));
 						nvgMoveTo(args.vg, VEC_ARGS(p));
 						p.x = rack::mm2px(1 + ((i+1)*stepX)-1);
 						nvgLineTo(args.vg, VEC_ARGS(p));
@@ -118,7 +116,7 @@ struct ORBsqViDisplay : rack::LedDisplay {
 				nvgBeginPath(args.vg);
 
 				p.x = rack::mm2px(1 + ((curstep)*stepX));
-				p.y = rack::mm2px(displaySize.y-7);//box.size.y-1;
+				p.y = rack::mm2px(displaySize.y-7);
 				nvgMoveTo(args.vg, VEC_ARGS(p));
 				p.x = rack::mm2px(1 + ((curstep+1)*stepX));
 				nvgLineTo(args.vg, VEC_ARGS(p));
@@ -135,12 +133,12 @@ struct ORBsqViDisplay : rack::LedDisplay {
 				nvgFontSize(args.vg, 12);
 				nvgFontFaceId(args.vg, font->handle);
 				nvgFillColor(args.vg, nvgRGB(0xd0,0xd0,0xd0));
-				std::string stepsStr = "Steps:" + std::to_string(steps);//"STEPS:";// std::to_string(steps);
+				std::string stepsStr = "Steps:" + std::to_string(steps);
 				nvgTextAlign(args.vg, NVG_ALIGN_LEFT);
 				nvgText(args.vg, rack::mm2px(1.5),rack::mm2px(37.5), stepsStr.c_str(), NULL);
 
 				if (euclideanFilter) {
-					std::string stepsStr = "EuFlt:" + std::to_string(filtersteps);//"STEPS:";// std::to_string(steps);
+					stepsStr = "EuFlt:" + std::to_string(filtersteps);
 					nvgTextAlign(args.vg, NVG_ALIGN_RIGHT);
 					nvgText(args.vg, rack::mm2px(displaySize.x-1),rack::mm2px(37.5), stepsStr.c_str(), NULL);
 				}
