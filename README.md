@@ -2,7 +2,7 @@
 
 ORBsq Vi is an algorithmic CV generator. It is based on an original hardware module originally called Orbweaver, but later rebranded as ORBsq (with MIDI and GB01 versions also made).
 
-<img src="site/ORBsqVi_UI.png" width="350" alt="ORBsq Vi main interface in its default state" />
+<img src="https://github.com/gwygonik/WygoniumModules/blob/main/site/ORBsqVi_UI.png" width="350" alt="ORBsq Vi main interface in its default state" />
 
 At its core, ORBsq Vi generates stepped sequences using an orbital path around a configurable point (**Base**) in a 2D noise field. The size of the orbit can be modified to be very small, with minimal changes in noise, to very large with large changes in the noise using the (**Range**) parameter.
 
@@ -24,7 +24,7 @@ ORBsq Vi provides three CV outputs, each with their own trigger output. **Main**
 
 ## Video demos (YouTube):
 
-[![ORBsq Vi demo video](site/vidcover.jpg)](https://youtu.be/m9-blrdRVsM)
+[![ORBsq Vi demo video](https://github.com/gwygonik/WygoniumModules/blob/main/site/vidcover.jpg)](https://youtu.be/m9-blrdRVsM)
 
 ## CPU Usage Note
 
