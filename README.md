@@ -1,6 +1,6 @@
 # ORBsq Vi
 
-ORBsq Vi is an algorithmic CV generator. It is based on an original hardware module originally called Orbweaver, but later rebranded as ORBsq (with MIDI and GB01 versions also made).
+ORBsq Vi is an algorithmic CV generator. It is based on an original hardware module called Orbweaver, but later rebranded as ORBsq [(with MIDI and GB01 versions also made)](https://gwygonik.github.io/Wygonium-Info/).
 
 <img src="https://github.com/gwygonik/WygoniumModules/blob/main/site/ORBsqVi_UI.png" width="350" alt="ORBsq Vi main interface in its default state" />
 
