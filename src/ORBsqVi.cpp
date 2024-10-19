@@ -150,15 +150,7 @@ struct ORBsqVi : Module {
 		variance = std::pow(2,(float)params[VARIANCE_PARAM].getValue());
 		drift = params[DRIFT_PARAM].getValue();
 		filterType = params[FILTERTYPE_PARAM].getValue();
-		if (filterType != oldFilterType) {
-			dirty = true;
-			oldFilterType = filterType;
-        }
-		filterShift = params[OFFSET1_PARAM].getValue();
-		if (filterShift != oldFilterShift) {
-			dirty = true;
-			oldFilterShift = filterShift;
-        }
+		filterShift = clamp(params[OFFSET1_PARAM].getValue(),0.f,(float)steps-1.f);
 
 		if (inputs[POS_INPUT].isConnected()) {
 			base = clamp(inputs[POS_INPUT].getVoltage(),1.f,10.f);
@@ -214,7 +206,7 @@ struct ORBsqVi : Module {
 			dirty = true;
 		}
 
-		if ((filter != lastFilter) || dirty) {
+		if ((filter != lastFilter) || (filterType != oldFilterType) || (filterShift != oldFilterShift) || dirty) {
 			if (filterType > 0.5f) {
 				for (int r=0;r<steps;r++) {
 					if (filter > 0) {
@@ -253,7 +245,7 @@ struct ORBsqVi : Module {
 						int num_pulses = steps - current_filter;
 						// simple
 						for (int i=0;i<steps;i++) {
-							curSeqState[(i+(int)ceil(filterShift))%steps] = !((((num_pulses * (i + 0)) % steps) + num_pulses) >= steps);
+							curSeqState[(i+(int)floor(filterShift))%steps] = !((((num_pulses * (i + 0)) % steps) + num_pulses) >= steps);
 						}
 					}
 				} else {
@@ -268,12 +260,14 @@ struct ORBsqVi : Module {
 
 						// simple
 						for (int i=0;i<steps;i++) {
-							curSeqState[(i+(int)ceil(filterShift))%steps] = ((((num_pulses * (i + 0)) % steps) + num_pulses) >= steps);
+							curSeqState[(i+(int)floor(filterShift))%steps] = ((((num_pulses * (i + 0)) % steps) + num_pulses) >= steps);
 						}
 					}
 				
 				}
             }
+			oldFilterType = filterType;
+			oldFilterShift = filterShift;
 			lastFilter = filter;
 			dirty = false;
 		}
@@ -427,6 +421,8 @@ struct ORBsqViWidget : ModuleWidget {
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(86.271, 116.325)), module, ORBsqVi::DRONETRIG_OUTPUT)); //54.270836
 
 	}
+
+
 };
 
 
