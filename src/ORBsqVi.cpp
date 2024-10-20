@@ -178,8 +178,9 @@ struct ORBsqVi : Module {
 		}
 
 
-		filter = rescale(params[FILTER_PARAM].getValue(),-1.f,1.f,-0.85f,0.85f);
-		if ((filter > -0.01f) && (filter < 0.01f)) filter = 0.f;
+		//filter = rescale(params[FILTER_PARAM].getValue(),-1.f,1.f,-0.85f,0.85f);
+		filter = params[FILTER_PARAM].getValue();
+		if ((filter > -0.02f) && (filter < 0.02f)) filter = 0.f;
 
 		drift_div = 0.0f;
 		if (params[DRIFTTYPE_PARAM].getValue() == 1.0f) {
@@ -210,14 +211,14 @@ struct ORBsqVi : Module {
 			if (filterType > 0.5f) {
 				for (int r=0;r<steps;r++) {
 					if (filter > 0) {
-						if ((curSeqVal[r] <= filter) && (curSeqVal[r] >= filter*-1.0f)) {
+						if ((curSeqVal[r] <= filter) && (curSeqVal[r] >= filter*-1.0f+0.15f)) {
 							curSeqState[r] = true;
 						} else {
 							curSeqState[r] = false;
 						}
 					} else if (filter < 0) {
 						float tf = std::abs(filter);
-						if ((curSeqVal[r] <= tf) && (curSeqVal[r] >= tf*-1.0f)) {
+						if ((curSeqVal[r] <= tf) && (curSeqVal[r] >= tf*-1.0f+0.15f)) {
 							curSeqState[r] = false;
 						} else {
 							curSeqState[r] = true;
@@ -229,7 +230,7 @@ struct ORBsqVi : Module {
 				}
 			} else {
 				// euclidean
-				int current_filter = (int)floor(clamp(rescale(filter,-0.85f,0.85f,(steps*-1)-1,steps+1),(float)steps*-1,(float)steps));
+				int current_filter = (int)floor(clamp(rescale(filter,-1.f,1.f,(steps*-1)-1,steps+1),(float)steps*-1,(float)steps));
 				filter_steps = current_filter;
 				if (current_filter == 0) {
 					for (int i=0;i<steps;i++) {
