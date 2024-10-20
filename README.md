@@ -40,7 +40,7 @@ The OpenSimplex2 noise code utilized in this module was released as public domai
 ## 2.0.2
 - Filter offset no longer regenerates noise field
 - Filter offset also stays at 0 instead of sometimes jumping up to 1
-- ~~Re-worked Filter parameter slider to better select 0 (middle) value~~ (in progress)
+- Re-worked Filter parameter slider to better select 0 (middle) value
 -->
 
 ## 2.0.1
