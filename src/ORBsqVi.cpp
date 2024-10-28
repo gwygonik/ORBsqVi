@@ -137,6 +137,17 @@ struct ORBsqVi : Module {
 		currentDriftAcc = baseDriftAcc / (e.sampleRate / 44100.0f);
     }
 
+	void onReset(const ResetEvent& e) override {
+		Module::onReset(e);
+		invertVoltage = false;
+		canDriftNormal = true;
+		canDriftFiltered = true;
+		canDriftDrone = true;
+		resetResetsDrift = false;
+		curStep = -1;
+		driftAcc = 0.0f;
+	}
+
 	void process(const ProcessArgs& args) override {
 		bool dirty = false;
 
