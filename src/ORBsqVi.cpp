@@ -55,7 +55,7 @@ struct ORBsqVi : Module {
 	float curSeqVal[16];
 	bool curSeqState[16];
 	float displayStepVal[16];
-	float curVolt;
+	float curVolt, droneVolt;
 	float driftAmt, driftAcc, drift_div;
 	bool triggerMain, triggerFiltered, triggerDrone;
 	float TWO_PI = 2.f * M_PI;
@@ -69,6 +69,10 @@ struct ORBsqVi : Module {
 	bool triggered = false;
 	float baseDriftAcc = 0.00000125f;
 	float currentDriftAcc = baseDriftAcc;
+	bool canDriftNormal = true;
+	bool canDriftFiltered = true;
+	bool canDriftDrone = true;
+	bool resetResetsDrift = false;
 
 	dsp::SchmittTrigger inTrigger;
 	dsp::SchmittTrigger inReset;
@@ -178,7 +182,6 @@ struct ORBsqVi : Module {
 		}
 
 
-		//filter = rescale(params[FILTER_PARAM].getValue(),-1.f,1.f,-0.85f,0.85f);
 		filter = params[FILTER_PARAM].getValue();
 		if ((filter > -0.02f) && (filter < 0.02f)) filter = 0.f;
 
@@ -275,6 +278,9 @@ struct ORBsqVi : Module {
 
 		if (inReset.process(inputs[RESET_INPUT].getVoltage(), 0.01f, 2.f)) {
 			curStep = -1;
+			if (resetResetsDrift) {
+				driftAcc = 0.0f;
+            }
 		}
 
 		if (inTrigger.process(inputs[TRIGGER_INPUT].getVoltage(), 0.01f, 2.f)) {
@@ -287,8 +293,23 @@ struct ORBsqVi : Module {
 			curStep %= steps;
 
 			curVolt = curSeqVal[curStep];
-			curVolt += std::sin(driftAcc + (curStep*drift_div)) * drift;
+			droneVolt = curVolt;
+			if (curSeqState[curStep]) {
+				// normal unfiltered note
+				if (canDriftNormal) {
+					curVolt += std::sin(driftAcc + (curStep*drift_div)) * drift;
+                }
+            } else {
+				// filtered note... drift filtered?
+				if (canDriftFiltered) {
+					curVolt += std::sin(driftAcc + (curStep*drift_div)) * drift;
+                }
+            }
+			if (canDriftDrone) {
+				droneVolt += std::sin(driftAcc + (curStep*drift_div)) * drift;
+            }
 			curVolt *= curScale1;
+			droneVolt *= curScale1;
 
 			if (curVolt > 5.f) {
 				curVolt = 5.f - (curVolt - 5.f);
@@ -296,13 +317,21 @@ struct ORBsqVi : Module {
 			if (curVolt < -5.f) {
 				curVolt = -5.f + (std::abs(curVolt) - 5.f);
 			}
+			if (droneVolt > 5.f) {
+				droneVolt = 5.f - (droneVolt - 5.f);
+			}
+			if (droneVolt < -5.f) {
+				droneVolt = -5.f + (std::abs(droneVolt) - 5.f);
+			}
 
 
 
 			if (params[VOLTSCALE_PARAM].getValue() == 2) {
 				curVolt = rescale(curVolt, -5.f, 5.f, 0.f, 5.f);
+				droneVolt = rescale(droneVolt, -5.f, 5.f, 0.f, 5.f);
 			} else if (params[VOLTSCALE_PARAM].getValue() == 1) {
 				curVolt = rescale(curVolt, -5.f, 5.f, 0.f, 10.f);
+				droneVolt = rescale(droneVolt, -5.f, 5.f, 0.f, 10.f);
 			}
 
 			if (curSeqState[curStep]) {
@@ -314,7 +343,7 @@ struct ORBsqVi : Module {
 			}
 			if (curStep == 0) {
 				pulseOutputDrone.trigger(1e-3f);
-				outputs[DRONECV_OUTPUT].setVoltage(curVolt);
+				outputs[DRONECV_OUTPUT].setVoltage(droneVolt);
 			}
 
 			triggered = false;
@@ -338,16 +367,40 @@ struct ORBsqVi : Module {
 	json_t* dataToJson() override {
 		json_t* rootJ = json_object();
 
-		json_t* invertJ = json_boolean(invertVoltage);
-		json_object_set_new(rootJ, "invertVoltage", invertJ);
+		json_t* val = json_boolean(invertVoltage);
+		json_object_set_new(rootJ, "invertVoltage", val);
+		val = json_boolean(canDriftNormal);
+		json_object_set_new(rootJ, "canDriftNormal", val);
+		val = json_boolean(canDriftFiltered);
+		json_object_set_new(rootJ, "canDriftFiltered", val);
+		val = json_boolean(canDriftDrone);
+		json_object_set_new(rootJ, "canDriftDrone", val);
+		val = json_boolean(resetResetsDrift);
+		json_object_set_new(rootJ, "resetResetsDrift", val);
 
 		return rootJ;
 	}
 
 	void dataFromJson(json_t* rootJ) override {
-		json_t* invertVoltageJ = json_object_get(rootJ, "invertVoltage");
-		if (invertVoltageJ) {
-			invertVoltage = json_boolean_value(invertVoltageJ);
+		json_t* val = json_object_get(rootJ, "invertVoltage");
+		if (val) {
+			invertVoltage = json_boolean_value(val);
+		}
+		val = json_object_get(rootJ, "canDriftNormal");
+		if (val) {
+			canDriftNormal = json_boolean_value(val);
+		}
+		val = json_object_get(rootJ, "canDriftFiltered");
+		if (val) {
+			canDriftFiltered = json_boolean_value(val);
+		}
+		val = json_object_get(rootJ, "canDriftDrone");
+		if (val) {
+			canDriftDrone = json_boolean_value(val);
+		}
+		val = json_object_get(rootJ, "resetResetsDrift");
+		if (val) {
+			resetResetsDrift = json_boolean_value(val);
 		}
 	}
 
@@ -421,6 +474,17 @@ struct ORBsqViWidget : ModuleWidget {
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(86.271, 105.742)), module, ORBsqVi::DRONECV_OUTPUT)); //54.270836
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(86.271, 116.325)), module, ORBsqVi::DRONETRIG_OUTPUT)); //54.270836
 
+	}
+
+	void appendContextMenu(Menu* menu) override {
+		ORBsqVi* module = getModule<ORBsqVi>();
+		menu->addChild(new MenuSeparator);
+		menu->addChild(createMenuLabel("ORBsq Vi Options"));
+		menu->addChild(createBoolPtrMenuItem("Drift Main Steps", "", &module->canDriftNormal));
+		menu->addChild(createBoolPtrMenuItem("Drift Filtered Steps", "", &module->canDriftFiltered));
+		menu->addChild(createBoolPtrMenuItem("Drift Drone", "", &module->canDriftDrone));
+		menu->addChild(new MenuSeparator);
+		menu->addChild(createBoolPtrMenuItem("Reset also resets Drift", "", &module->resetResetsDrift));
 	}
 
 

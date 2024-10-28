@@ -10,6 +10,7 @@ struct ORBsqViDisplay : rack::LedDisplay {
 	int filtersteps = 0;
 	float curScale1 = 0.f;
 	bool euclideanFilter = false;
+	float curDrone = 0.f;
 
 	std::string fontPath = rack::asset::system("res/fonts/ShareTechMono-Regular.ttf");
 
@@ -18,11 +19,26 @@ struct ORBsqViDisplay : rack::LedDisplay {
 		if (layer == 1 && module) {
 			for (int i=0;i<16;i++) {
 				ramp[i] = module->displayStepVal[i];
-				ramp[i] += std::sin(module->driftAcc + (i*module->drift_div)) * module->drift;
+				if (module->curSeqState[i] == true) {
+					if (module->canDriftNormal) {
+						ramp[i] += std::sin(module->driftAcc + (i*module->drift_div)) * module->drift;
+                    }
+                } else {
+					if (module->canDriftFiltered) {
+						ramp[i] += std::sin(module->driftAcc + (i*module->drift_div)) * module->drift;
+                    }
+                }
 				ramp[i] *= module->curScale1;
 				if (ramp[i] > 5.0f) ramp[i] = 5.0f - (ramp[i] - 5.0f);
 				if (ramp[i] < -5.0f) ramp[i] = -5.0f + std::abs(ramp[i] + 5.0f);
 			}
+			curDrone = module->displayStepVal[0];
+			if (module->canDriftDrone) {
+				curDrone += std::sin(module->driftAcc) * module->drift;
+            }
+			curDrone *= module->curScale1;
+			if (curDrone > 5.0f) curDrone = 5.0f - (curDrone - 5.0f);
+			if (curDrone < -5.0f) curDrone = -5.0f + std::abs(curDrone + 5.0f);
 
 			curScale1 = module->curScale1;
 			steps = module->steps;
@@ -68,7 +84,7 @@ struct ORBsqViDisplay : rack::LedDisplay {
 			// drone
 			nvgBeginPath(args.vg);
 			p.x = rack::mm2px(1);
-			p.y = rack::mm2px(rack::math::clamp(rack::math::rescale(ramp[0], -5.f, 5.f, displaySize.y-8.f, 2.f),2.f,displaySize.y-8.f));
+			p.y = rack::mm2px(rack::math::clamp(rack::math::rescale(curDrone, -5.f, 5.f, displaySize.y-8.f, 2.f),2.f,displaySize.y-8.f));
 			nvgMoveTo(args.vg, VEC_ARGS(p));
 			p.x = rack::mm2px(displaySize.x-1);
 			nvgLineTo(args.vg, VEC_ARGS(p));
@@ -104,7 +120,7 @@ struct ORBsqViDisplay : rack::LedDisplay {
 						nvgLineCap(args.vg, NVG_BUTT);
 						nvgMiterLimit(args.vg, 2.f);
 						nvgStrokeWidth(args.vg, 1.0f);
-						nvgStrokeColor(args.vg, nvgRGB(0xd0,0xd0,0xd0));
+						nvgStrokeColor(args.vg, nvgRGBA(0xd0,0xd0,0xd0,0xa0));
 						nvgStroke(args.vg);
                     }
 				}
