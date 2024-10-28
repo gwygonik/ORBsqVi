@@ -22,6 +22,14 @@ ORBsq Vi will step through the sequence when a trigger is sensed on the **Trig I
 
 ORBsq Vi provides three CV outputs, each with their own trigger output. **Main**, **Filter**, and **Drone**. **Main** is any step that is not filtered. **Filter** is any step that has been filtered. **Drone** is, basically, just the first step CV with trigger.
 
+<!--
+Context menu items:
+- **"Drift Main Steps"** will enable/disable drifting of non-filtered steps.
+- **"Drift Filtered Steps"** will enable/disable drifting of filtered steps.
+- **"Drift Drone"** will enable/disable drifting of the drone step.
+- **"Reset also Resets Drift"** will reset the drift state when a trigger is received on the **Reset** input.
+-->
+
 ## Video demos (YouTube):
 
 [![ORBsq Vi demo video](https://github.com/gwygonik/WygoniumModules/blob/main/site/vidcover.jpg)](https://youtu.be/m9-blrdRVsM)
@@ -35,6 +43,12 @@ Step values are only generated when **Base** or **Range** are adjusted and can b
 The OpenSimplex2 noise code utilized in this module was released as public domain via the Unlicense License. Besides in this repo, you can find the source here: (https://gist.github.com/Markyparky56/e0fd43e847ac53068603130df3e8e560)
 
 # Changelog
+
+<!--
+## 2.0.3
+- Context menu options added! (See docs above)
+- Minor visual tweaks
+-->
 
 ## 2.0.2
 - Filter offset no longer regenerates noise field
