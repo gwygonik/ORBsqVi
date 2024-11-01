@@ -134,7 +134,12 @@ struct ORBsqVi : Module {
 	}
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
-		currentDriftAcc = baseDriftAcc / (e.sampleRate / 44100.0f);
+		// guard against divide-by-zero, which can apparently sometimes happen on Windows
+		if (e.sampleRate > 0) {
+			currentDriftAcc = baseDriftAcc / (e.sampleRate / 44100.0f);
+        } else {
+			currentDriftAcc = baseDriftAcc;
+        }
     }
 
 	void onReset(const ResetEvent& e) override {
