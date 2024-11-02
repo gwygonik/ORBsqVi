@@ -45,6 +45,9 @@ The OpenSimplex2 noise code utilized in this module was released as public domai
 # Changelog
 
 <!--
+## 2.0.4
+- Guard against crash on Windows with no audio interface
+
 ## 2.0.3
 - Context menu options added! (See docs above)
 - Minor visual tweaks
