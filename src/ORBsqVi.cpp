@@ -83,6 +83,7 @@ struct ORBsqVi : Module {
 
 	OpenSimplexNoise simplexNoise;
 
+	float curSampleRate = 0.f;
 
 	ORBsqVi() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
@@ -154,6 +155,8 @@ struct ORBsqVi : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
+		curSampleRate = args.sampleRate;
+
 		bool dirty = false;
 
 		steps = params[STEPS_PARAM].getValue();

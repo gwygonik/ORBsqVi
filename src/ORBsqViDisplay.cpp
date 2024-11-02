@@ -17,6 +17,8 @@ struct ORBsqViDisplay : rack::LedDisplay {
 	void drawLayer(const DrawArgs& args, int layer) override {
 
 		if (layer == 1 && module) {
+			if (module->curSampleRate == 0.f) return;
+
 			for (int i=0;i<16;i++) {
 				ramp[i] = module->displayStepVal[i];
 				if (module->curSeqState[i] == true) {
